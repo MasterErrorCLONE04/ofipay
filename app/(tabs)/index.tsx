@@ -8,21 +8,39 @@ import {
   Eye,
   TrendingUp,
   ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
+  LogOut
 } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const { userProfile, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/login');
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Good morning</Text>
-          <Text style={styles.userName}>John Doe</Text>
+          <Text style={styles.userName}>{userProfile?.full_name || 'User'}</Text>
         </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <Text style={styles.profileInitial}>JD</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.profileButton}>
+            <Text style={styles.profileInitial}>
+              {userProfile?.full_name?.charAt(0) || 'U'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <LogOut size={20} color="#667eea" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Balance Card */}
@@ -173,6 +191,11 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginTop: 4,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   profileButton: {
     width: 48,
     height: 48,
@@ -185,6 +208,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Inter-SemiBold',
     color: '#ffffff',
+  },
+  signOutButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   balanceCard: {
     marginHorizontal: 24,

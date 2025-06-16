@@ -29,15 +29,16 @@ import Animated, {
   withTiming,
   withSpring 
 } from 'react-native-reanimated';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
   });
@@ -45,6 +46,7 @@ export default function RegisterScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Animation values
   const formOpacity = useSharedValue(0);
@@ -58,30 +60,40 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = async () => {
-    const { fullName, email, phone, password, confirmPassword } = formData;
+    const { fullName, email, password, confirmPassword } = formData;
 
-    if (!fullName || !email || !phone || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!fullName || !email || !password || !confirmPassword) {
+      setError('Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
     if (!acceptTerms) {
-      Alert.alert('Error', 'Please accept the terms and conditions');
+      setError('Please accept the terms and conditions');
       return;
     }
 
     setIsLoading(true);
+    setError(null);
     buttonScale.value = withSpring(0.95);
 
-    // Simulate registration process
-    setTimeout(() => {
-      setIsLoading(false);
-      buttonScale.value = withSpring(1);
+    const { error: signUpError } = await signUp(email, password, fullName);
+
+    setIsLoading(false);
+    buttonScale.value = withSpring(1);
+
+    if (signUpError) {
+      setError(signUpError.message || 'An error occurred during registration');
+    } else {
       Alert.alert(
         'Success',
         'Account created successfully! Please check your email for verification.',
@@ -92,7 +104,7 @@ export default function RegisterScreen() {
           },
         ]
       );
-    }, 2000);
+    }
   };
 
   const updateFormData = (field: string, value: string) => {
@@ -130,6 +142,13 @@ export default function RegisterScreen() {
           {/* Registration Form */}
           <Animated.View style={[styles.formContainer, formAnimatedStyle]}>
             <View style={styles.form}>
+              {/* Error Message */}
+              {error && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
+
               {/* Full Name Input */}
               <View style={styles.inputContainer}>
                 <View style={styles.inputIconContainer}>
@@ -159,21 +178,6 @@ export default function RegisterScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
-                />
-              </View>
-
-              {/* Phone Input */}
-              <View style={styles.inputContainer}>
-                <View style={styles.inputIconContainer}>
-                  <Phone size={20} color="#667eea" />
-                </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Phone number"
-                  placeholderTextColor="#9CA3AF"
-                  value={formData.phone}
-                  onChangeText={(value) => updateFormData('phone', value)}
-                  keyboardType="phone-pad"
                 />
               </View>
 
@@ -346,6 +350,18 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 20,
+  },
+  errorContainer: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#DC2626',
+    textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',

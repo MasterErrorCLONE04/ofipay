@@ -20,15 +20,18 @@ import Animated, {
   withTiming,
   withSpring 
 } from 'react-native-reanimated';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Animation values
   const formOpacity = useSharedValue(0);
@@ -43,20 +46,25 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setError('Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
+    setError(null);
     buttonScale.value = withSpring(0.95);
 
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      buttonScale.value = withSpring(1);
+    const { error: signInError } = await signIn(email, password);
+
+    setIsLoading(false);
+    buttonScale.value = withSpring(1);
+
+    if (signInError) {
+      setError(signInError.message || 'An error occurred during login');
+    } else {
       // Navigate to main app (tabs)
       router.replace('/(tabs)');
-    }, 2000);
+    }
   };
 
   const formAnimatedStyle = useAnimatedStyle(() => ({
@@ -90,6 +98,13 @@ export default function LoginScreen() {
           {/* Login Form */}
           <Animated.View style={[styles.formContainer, formAnimatedStyle]}>
             <View style={styles.form}>
+              {/* Error Message */}
+              {error && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
+              )}
+
               {/* Email Input */}
               <View style={styles.inputContainer}>
                 <View style={styles.inputIconContainer}>
@@ -238,6 +253,18 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 20,
+  },
+  errorContainer: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#DC2626',
+    textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',

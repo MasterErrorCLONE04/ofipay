@@ -11,11 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CreditCard } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LoadingScreen() {
   const router = useRouter();
+  const { session, loading } = useAuth();
   const [progress, setProgress] = useState(0);
   
   // Animation values
@@ -53,16 +55,33 @@ export default function LoadingScreen() {
       });
     }, 40);
 
-    // Navigate after 4 seconds
+    // Navigate after 4 seconds or when auth is ready
     const navigationTimer = setTimeout(() => {
-      router.replace('/login');
+      if (!loading) {
+        if (session) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/login');
+        }
+      }
     }, 4000);
 
     return () => {
       clearInterval(timer);
       clearTimeout(navigationTimer);
     };
-  }, []);
+  }, [loading, session]);
+
+  // Navigate immediately if auth state is determined and loading is complete
+  useEffect(() => {
+    if (!loading && progress >= 100) {
+      if (session) {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/login');
+      }
+    }
+  }, [loading, session, progress]);
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: logoScale.value }],
