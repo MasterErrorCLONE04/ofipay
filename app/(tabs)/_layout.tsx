@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, CreditCard, BarChart3, Settings } from 'lucide-react-native';
+import { Home, Search, Calendar, User, Bell } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -15,6 +15,14 @@ export default function TabLayout() {
           paddingBottom: 8,
           paddingTop: 8,
           height: 80,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -32,29 +40,38 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments"
+        name="search"
         options={{
-          title: 'Payments',
+          title: 'Search',
           tabBarIcon: ({ size, color }) => (
-            <CreditCard size={size} color={color} />
+            <Search size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="analytics"
+        name="appointments"
         options={{
-          title: 'Analytics',
+          title: 'Appointments',
           tabBarIcon: ({ size, color }) => (
-            <BarChart3 size={size} color={color} />
+            <Calendar size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="notifications"
         options={{
-          title: 'Settings',
+          title: 'Notifications',
           tabBarIcon: ({ size, color }) => (
-            <Settings size={size} color={color} />
+            <Bell size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ size, color }) => (
+            <User size={size} color={color} />
           ),
         }}
       />
