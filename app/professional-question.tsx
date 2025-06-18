@@ -8,12 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  Briefcase, 
-  Users, 
-  ArrowRight,
-  CheckCircle
-} from 'lucide-react-native';
+import { Briefcase, Users, ArrowRight, CircleCheck as CheckCircle } from 'lucide-react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 

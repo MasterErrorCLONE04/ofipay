@@ -8,14 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  User, 
-  Calendar, 
-  Camera,
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle
-} from 'lucide-react-native';
+import { User, Calendar, Camera, ArrowRight, ArrowLeft, CircleCheck as CheckCircle } from 'lucide-react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
