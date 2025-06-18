@@ -7,15 +7,7 @@ import {
   Image
 } from 'react-native';
 import { useState, useEffect } from 'react';
-import { 
-  Bell, 
-  Calendar, 
-  Heart, 
-  MessageCircle, 
-  CheckCircle,
-  Clock,
-  X
-} from 'lucide-react-native';
+import { Bell, Calendar, Heart, MessageCircle, CircleCheck as CheckCircle, Clock, X } from 'lucide-react-native';
 
 interface Notification {
   id: string;

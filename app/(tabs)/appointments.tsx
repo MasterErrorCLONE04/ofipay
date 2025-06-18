@@ -8,15 +8,7 @@ import {
   Alert
 } from 'react-native';
 import { useState, useEffect } from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  MapPin, 
-  Phone,
-  MessageCircle,
-  X,
-  CheckCircle
-} from 'lucide-react-native';
+import { Calendar as CalendarIcon, Clock, MapPin, Phone, MessageCircle, X, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 interface Appointment {

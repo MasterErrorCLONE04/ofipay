@@ -9,19 +9,7 @@ import {
   Alert
 } from 'react-native';
 import { useState } from 'react';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Heart, 
-  MessageCircle, 
-  Settings,
-  LogOut,
-  Edit3,
-  Camera,
-  Save,
-  X
-} from 'lucide-react-native';
+import { User, Mail, Calendar, Heart, MessageCircle, Settings, LogOut, CreditCard as Edit3, Camera, Save, X } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 
