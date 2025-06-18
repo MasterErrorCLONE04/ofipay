@@ -6,7 +6,10 @@ import {
   TouchableOpacity, 
   Image,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  TextInput,
+  Modal,
+  Alert
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +20,11 @@ import {
   Share2,
   MapPin,
   Star,
-  Calendar
+  Calendar,
+  UserPlus,
+  UserCheck,
+  Send,
+  X
 } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
@@ -33,6 +40,7 @@ interface Post {
     avatar: string;
     rating: number;
     location: string;
+    isFollowing: boolean;
   };
   content: string;
   image?: string;
@@ -47,6 +55,17 @@ interface Story {
   name: string;
   avatar: string;
   isViewed: boolean;
+  image: string;
+}
+
+interface Comment {
+  id: string;
+  user: {
+    name: string;
+    avatar: string;
+  };
+  content: string;
+  createdAt: string;
 }
 
 export default function HomeScreen() {
@@ -55,6 +74,10 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [showComments, setShowComments] = useState<string | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
     loadFeedData();
@@ -68,18 +91,21 @@ export default function HomeScreen() {
         name: 'Featured',
         avatar: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
         isViewed: false,
+        image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop',
       },
       {
         id: '2',
         name: 'Maria S.',
         avatar: 'https://images.pexels.com/photos/3992656/pexels-photo-3992656.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
         isViewed: false,
+        image: 'https://images.pexels.com/photos/3764013/pexels-photo-3764013.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop',
       },
       {
         id: '3',
         name: 'Carlos R.',
         avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
         isViewed: true,
+        image: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop',
       },
     ]);
 
@@ -93,6 +119,7 @@ export default function HomeScreen() {
           avatar: 'https://images.pexels.com/photos/3992656/pexels-photo-3992656.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
           rating: 4.9,
           location: 'Downtown',
+          isFollowing: false,
         },
         content: 'Just finished this amazing balayage transformation! ✨ Book your appointment for the holiday season. Limited slots available!',
         image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
@@ -110,6 +137,7 @@ export default function HomeScreen() {
           avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
           rating: 4.8,
           location: 'Westside',
+          isFollowing: true,
         },
         content: 'Completed a full home electrical upgrade today. Safety first! 🔌 Contact me for your electrical needs - licensed and insured.',
         image: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
@@ -127,12 +155,37 @@ export default function HomeScreen() {
           avatar: 'https://images.pexels.com/photos/3768916/pexels-photo-3768916.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
           rating: 5.0,
           location: 'Fitness Center',
+          isFollowing: false,
         },
         content: 'New year, new goals! 💪 Starting my transformation program next month. Limited spots available. DM me for details!',
         likes: 156,
         comments: 34,
         isLiked: false,
         createdAt: '6h ago',
+      },
+    ]);
+  };
+
+  const loadComments = (postId: string) => {
+    // Mock comments data
+    setComments([
+      {
+        id: '1',
+        user: {
+          name: 'Jennifer Lopez',
+          avatar: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+        },
+        content: 'Amazing work! You\'re so talented! 😍',
+        createdAt: '1h ago',
+      },
+      {
+        id: '2',
+        user: {
+          name: 'Carlos Mendez',
+          avatar: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+        },
+        content: 'How much for a similar style?',
+        createdAt: '45m ago',
       },
     ]);
   };
@@ -155,12 +208,67 @@ export default function HomeScreen() {
     ));
   };
 
+  const handleFollow = (professionalId: string) => {
+    setPosts(posts.map(post => 
+      post.professional.id === professionalId 
+        ? { 
+            ...post, 
+            professional: {
+              ...post.professional,
+              isFollowing: !post.professional.isFollowing
+            }
+          }
+        : post
+    ));
+  };
+
   const handleBookAppointment = (professionalId: string) => {
     router.push(`/appointment/book?professionalId=${professionalId}`);
   };
 
+  const handleStoryPress = (story: Story) => {
+    setSelectedStory(story);
+    // Mark story as viewed
+    setStories(stories.map(s => 
+      s.id === story.id ? { ...s, isViewed: true } : s
+    ));
+  };
+
+  const handleCommentsPress = (postId: string) => {
+    setShowComments(postId);
+    loadComments(postId);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+
+    const comment: Comment = {
+      id: Date.now().toString(),
+      user: {
+        name: userProfile?.full_name || 'You',
+        avatar: userProfile?.avatar_url || 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
+      },
+      content: newComment,
+      createdAt: 'now',
+    };
+
+    setComments([comment, ...comments]);
+    setNewComment('');
+
+    // Update comments count
+    setPosts(posts.map(post => 
+      post.id === showComments 
+        ? { ...post, comments: post.comments + 1 }
+        : post
+    ));
+  };
+
   const renderStory = (story: Story) => (
-    <TouchableOpacity key={story.id} style={styles.storyItem}>
+    <TouchableOpacity 
+      key={story.id} 
+      style={styles.storyItem}
+      onPress={() => handleStoryPress(story)}
+    >
       <LinearGradient
         colors={story.isViewed ? ['#E5E7EB', '#E5E7EB'] : ['#667eea', '#764ba2']}
         style={styles.storyGradient}
@@ -196,13 +304,36 @@ export default function HomeScreen() {
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.bookButton}
-          onPress={() => handleBookAppointment(post.professional.id)}
-        >
-          <Calendar size={16} color="#667eea" />
-          <Text style={styles.bookButtonText}>Book</Text>
-        </TouchableOpacity>
+        
+        <View style={styles.postHeaderActions}>
+          <TouchableOpacity 
+            style={[
+              styles.followButton,
+              post.professional.isFollowing && styles.followingButton
+            ]}
+            onPress={() => handleFollow(post.professional.id)}
+          >
+            {post.professional.isFollowing ? (
+              <UserCheck size={16} color="#10B981" />
+            ) : (
+              <UserPlus size={16} color="#667eea" />
+            )}
+            <Text style={[
+              styles.followButtonText,
+              post.professional.isFollowing && styles.followingButtonText
+            ]}>
+              {post.professional.isFollowing ? 'Following' : 'Follow'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.bookButton}
+            onPress={() => handleBookAppointment(post.professional.id)}
+          >
+            <Calendar size={16} color="#667eea" />
+            <Text style={styles.bookButtonText}>Book</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Post Content */}
@@ -229,7 +360,10 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => handleCommentsPress(post.id)}
+        >
           <MessageCircle size={20} color="#6B7280" />
           <Text style={styles.actionText}>{post.comments}</Text>
         </TouchableOpacity>
@@ -245,7 +379,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>OfiPay</Text>
+        <Text style={styles.logo}>SkillSync</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity 
             style={styles.notificationButton}
@@ -285,6 +419,86 @@ export default function HomeScreen() {
           {posts.map(renderPost)}
         </View>
       </ScrollView>
+
+      {/* Story Modal */}
+      <Modal
+        visible={selectedStory !== null}
+        animationType="fade"
+        statusBarTranslucent
+      >
+        {selectedStory && (
+          <View style={styles.storyModal}>
+            <Image 
+              source={{ uri: selectedStory.image }} 
+              style={styles.storyModalImage}
+              resizeMode="cover"
+            />
+            <View style={styles.storyModalHeader}>
+              <View style={styles.storyModalUser}>
+                <Image 
+                  source={{ uri: selectedStory.avatar }} 
+                  style={styles.storyModalAvatar} 
+                />
+                <Text style={styles.storyModalName}>{selectedStory.name}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.storyModalClose}
+                onPress={() => setSelectedStory(null)}
+              >
+                <X size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </Modal>
+
+      {/* Comments Modal */}
+      <Modal
+        visible={showComments !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.commentsModal}>
+          <View style={styles.commentsHeader}>
+            <Text style={styles.commentsTitle}>Comments</Text>
+            <TouchableOpacity onPress={() => setShowComments(null)}>
+              <X size={24} color="#374151" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.commentsList}>
+            {comments.map((comment) => (
+              <View key={comment.id} style={styles.commentItem}>
+                <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
+                <View style={styles.commentContent}>
+                  <View style={styles.commentBubble}>
+                    <Text style={styles.commentUser}>{comment.user.name}</Text>
+                    <Text style={styles.commentText}>{comment.content}</Text>
+                  </View>
+                  <Text style={styles.commentTime}>{comment.createdAt}</Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+          
+          <View style={styles.commentInput}>
+            <TextInput
+              style={styles.commentTextInput}
+              placeholder="Add a comment..."
+              value={newComment}
+              onChangeText={setNewComment}
+              multiline
+              placeholderTextColor="#9CA3AF"
+            />
+            <TouchableOpacity 
+              style={styles.commentSendButton}
+              onPress={handleAddComment}
+            >
+              <Send size={20} color="#667eea" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -447,6 +661,30 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#9CA3AF',
   },
+  postHeaderActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  followButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  followingButton: {
+    backgroundColor: '#D1FAE5',
+  },
+  followButtonText: {
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
+    color: '#667eea',
+  },
+  followingButtonText: {
+    color: '#10B981',
+  },
   bookButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -492,5 +730,133 @@ const styles = StyleSheet.create({
   },
   likedText: {
     color: '#EF4444',
+  },
+  storyModal: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  storyModalImage: {
+    flex: 1,
+    width: '100%',
+  },
+  storyModalHeader: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  storyModalUser: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  storyModalAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  storyModalName: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#ffffff',
+  },
+  storyModalClose: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  commentsModal: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  commentsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  commentsTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+  },
+  commentsList: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  commentItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    gap: 12,
+  },
+  commentAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  commentContent: {
+    flex: 1,
+    gap: 4,
+  },
+  commentBubble: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  commentUser: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  commentText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#374151',
+  },
+  commentTime: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#9CA3AF',
+    marginLeft: 12,
+  },
+  commentInput: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    gap: 12,
+  },
+  commentTextInput: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#111827',
+    maxHeight: 100,
+  },
+  commentSendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

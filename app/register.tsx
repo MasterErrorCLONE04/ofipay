@@ -19,7 +19,6 @@ import {
   Mail, 
   Lock, 
   User, 
-  Phone, 
   ArrowRight,
   Check 
 } from 'lucide-react-native';
@@ -94,16 +93,8 @@ export default function RegisterScreen() {
     if (signUpError) {
       setError(signUpError.message || 'An error occurred during registration');
     } else {
-      Alert.alert(
-        'Success',
-        'Account created successfully! Please check your email for verification.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/login'),
-          },
-        ]
-      );
+      // Navigate to professional question screen
+      router.replace('/professional-question');
     }
   };
 
@@ -136,7 +127,7 @@ export default function RegisterScreen() {
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.welcomeText}>Create Account</Text>
-            <Text style={styles.subtitleText}>Join OfiPay and start your secure payment journey</Text>
+            <Text style={styles.subtitleText}>Join SkillSync and start your journey</Text>
           </View>
 
           {/* Registration Form */}

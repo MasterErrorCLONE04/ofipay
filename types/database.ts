@@ -44,6 +44,8 @@ export interface Database {
           phone: string | null
           hourly_rate: number | null
           rating: number | null
+          years_experience: number | null
+          is_active: boolean
           created_at: string
         }
         Insert: {
@@ -54,6 +56,8 @@ export interface Database {
           phone?: string | null
           hourly_rate?: number | null
           rating?: number | null
+          years_experience?: number | null
+          is_active?: boolean
           created_at?: string
         }
         Update: {
@@ -64,6 +68,146 @@ export interface Database {
           phone?: string | null
           hourly_rate?: number | null
           rating?: number | null
+          years_experience?: number | null
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      posts: {
+        Row: {
+          id: string
+          user_id: string
+          content: string
+          image_url: string | null
+          likes_count: number
+          comments_count: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          content: string
+          image_url?: string | null
+          likes_count?: number
+          comments_count?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          content?: string
+          image_url?: string | null
+          likes_count?: number
+          comments_count?: number
+          created_at?: string
+        }
+      }
+      comments: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
+        }
+      }
+      likes: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
+      follows: {
+        Row: {
+          id: string
+          follower_id: string
+          following_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          following_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          following_id?: string
+          created_at?: string
+        }
+      }
+      stories: {
+        Row: {
+          id: string
+          user_id: string
+          image_url: string
+          content: string | null
+          expires_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          image_url: string
+          content?: string | null
+          expires_at: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          image_url?: string
+          content?: string | null
+          expires_at?: string
+          created_at?: string
+        }
+      }
+      story_views: {
+        Row: {
+          id: string
+          story_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          story_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          story_id?: string
+          user_id?: string
           created_at?: string
         }
       }

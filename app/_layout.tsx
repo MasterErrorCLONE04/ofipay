@@ -40,7 +40,11 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
+        <Stack.Screen name="professional-question" />
+        <Stack.Screen name="professional-setup" />
+        <Stack.Screen name="professional-onboarding" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(professional)" />
         <Stack.Screen name="professional/[id]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="appointment/book" options={{ presentation: 'modal' }} />
       </Stack>
